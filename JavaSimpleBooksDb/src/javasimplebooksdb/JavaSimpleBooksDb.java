@@ -58,11 +58,17 @@ public class JavaSimpleBooksDb extends JFrame implements ActionListener, FocusLi
     private JComboBox cboAuthor;
 
     private JTable tblBookList;
-
+    
+    public String DbNameAndPath = "E:\\GitRepos\\JavaSimpleBookDb\\JavaSimpleBooksDb\\src\\javasimplebooksdb\\Books.db";
+    public File DbFile = new File(DbNameAndPath);
+    
+    public Database db = new Database();
+    
     public static void main(String[] args)
     {
         JavaSimpleBooksDb booksDb = new JavaSimpleBooksDb();
         booksDb.RunSimpleBooksDb();
+        booksDb.CreateDatabase();
     }
 
     private void RunSimpleBooksDb()
@@ -82,6 +88,17 @@ public class JavaSimpleBooksDb extends JFrame implements ActionListener, FocusLi
         setResizable(false);
         setVisible(true);
     }
+    
+    public void CreateDatabase()
+    {
+        if (DbFile.exists()) { /* Do nothing */}
+        else
+        {
+            db.CreateNewDatabase(DbNameAndPath);
+            db.CreateDBTables(DbNameAndPath);
+        }
+    }
+    
 
     // <editor-fold defaultstate="collapsed" desc="GUI">
     private void ShowGUIComponents()
