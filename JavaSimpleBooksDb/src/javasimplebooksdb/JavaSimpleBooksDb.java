@@ -99,6 +99,78 @@ public class JavaSimpleBooksDb extends JFrame implements ActionListener, FocusLi
         }
     }
     
+    
+    
+    @Override
+    public void actionPerformed(ActionEvent e)
+    {
+        /*btnNavPrev, btnNavNext,
+        btnNavClearBook, btnNavRefreshTable, btnEditBookSave, btnEditBookNew,
+        btnEditBookFirst, btnEditBookLast, btnEditBookPrev, btnEditBookNext,
+        btnEditAuthorFirst,
+        btnEditAuthorLast, btnEditAuthorPrev, btnEditAuthorNext;*/
+        
+        // <editor-fold defaultstate="collapsed" desc="Author Add Edit Buttons">
+        
+        if (e.getSource() == btnEditAuthorSave)
+        {
+            if (lblAddEditAuthorIdStatus.getText() == "0")
+            {
+                try
+                {
+                    db.InsertAuthor(DbNameAndPath, txtAuthorName.getText());
+                    lblStatusUpdate.setText("Successfully added an Author");
+                }
+                catch(Exception ex)
+                {
+                    lblStatusUpdate.setText("Something went wrong adding an Author");
+                }        
+            }
+            else
+            {
+                try
+                {
+                    db.UpdateAuthor(DbNameAndPath, lblAddEditAuthorIdStatus.getText(), txtAuthorName.getText());
+                    lblStatusUpdate.setText("Successfully added an Author");
+                }
+                catch(Exception ex)
+                {
+                    lblStatusUpdate.setText("Something went wrong updating an Author");
+                }        
+            }
+        }
+        
+        if (e.getSource() == btnEditAuthorNew)
+        {
+            lblAddEditAuthorIdStatus.setText("0");
+            txtAuthorName.setText("");
+        }
+        
+        // </editor-fold>
+        
+        
+        if (e.getSource() == btnNavFirst)
+        {
+            
+        }
+        
+        if (e.getSource() == btnNavLast)
+        {
+            
+        }
+        
+        
+        
+        /* might use this later
+        if (e.getSource() == btnExit)
+        {
+            send();
+            System.exit(0);
+        }
+        */
+    }
+    
+    
 
     // <editor-fold defaultstate="collapsed" desc="GUI">
     private void ShowGUIComponents()
@@ -132,7 +204,7 @@ public class JavaSimpleBooksDb extends JFrame implements ActionListener, FocusLi
         lblEditBookAuthor = LibraryItems.LocateAJLabel(this, layout, "Author:", 12, 440, false, 9);
         lblAddEditAuthorTitle = LibraryItems.LocateAJLabel(this, layout, "Add & Edit Authors", 297, 320, true, 20);
         lblAddEditAuthorId = LibraryItems.LocateAJLabel(this, layout, "Author Id:", 300, 373, false, 9);
-        lblAddEditAuthorIdStatus = LibraryItems.LocateAJLabel(this, layout, "placeholder", 391, 373, false, 9);
+        lblAddEditAuthorIdStatus = LibraryItems.LocateAJLabel(this, layout, "0", 391, 373, false, 9);
         lblAddEditAuthorName = LibraryItems.LocateAJLabel(this, layout, "Author Name:", 300, 396, false, 9);
         lblAddEditStatus = LibraryItems.LocateAJLabel(this, layout, "Add/EditStatus:", 300, 540, false, 9);
         lblStatusUpdate = LibraryItems.LocateAJLabel(this, layout, "placeholder", 391, 540, false, 9);
@@ -186,12 +258,6 @@ public class JavaSimpleBooksDb extends JFrame implements ActionListener, FocusLi
     }
 
     @Override
-    public void actionPerformed(ActionEvent e)
-    {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
     public void focusGained(FocusEvent e)
     {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
@@ -202,11 +268,9 @@ public class JavaSimpleBooksDb extends JFrame implements ActionListener, FocusLi
     {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
 }
 
 // </editor-fold>
-
 
 // <editor-fold defaultstate="collapsed" desc="Overrides">
 /*@Override
@@ -228,5 +292,7 @@ public class JavaSimpleBooksDb extends JFrame implements ActionListener, FocusLi
     }*/
     
     // </editor-fold>
-     
 
+// <editor-fold defaultstate="collapsed" desc="Spare Editor fold">
+    
+    // </editor-fold>

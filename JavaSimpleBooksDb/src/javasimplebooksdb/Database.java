@@ -8,44 +8,39 @@ import java.util.ArrayList;
  * @author Lazy
  */
 public class Database
-{       
-    
-    public class SQLiteJDBCDriverConnection 
+{ 
+    /**
+     * Connect to a sample database
+     */
+    public Connection ConnectToDb(String fileAndPath)
     {
-        /**
-         * Connect to a sample database
-         */
-        public void ConnectToDb(String fileAndPath)
+        Connection conn = null;
+        try
         {
-            Connection conn = null;
+            String url = "jdbc:sqlite:" + fileAndPath;
+            conn = DriverManager.getConnection(url);
+
+            System.out.println("Database connection successful!");
+
+        } catch (SQLException ex)
+        {
+            System.out.println(ex.getMessage());
+        } finally
+        {
             try
             {
-                String url = "jdbc:sqlite:" + fileAndPath;   
-                conn = DriverManager.getConnection(url);
-
-                System.out.println("Database connection successful!");
-
-            } 
-            catch (SQLException ex)
+                if (conn != null)
+                {
+                    conn.close();
+                }
+            } catch (SQLException ex)
             {
                 System.out.println(ex.getMessage());
-            } 
-            finally
-            {
-                try
-                {
-                    if (conn != null)
-                    {
-                        conn.close();
-                    }
-                } catch (SQLException ex)
-                {
-                    System.out.println(ex.getMessage());
-                }
             }
         }
+        return conn;
     }
-    
+
     public void CreateNewDatabase(String fileAndPath)
     {
         String url = "jdbc:sqlite:" + fileAndPath;   
@@ -96,6 +91,185 @@ public class Database
             }
         }
     }
+    
+    // TODO: test Add Edit Methods
+    // <editor-fold defaultstate="collapsed" desc="Add Edit Methods">
+    
+    // test this
+    public void InsertAuthor(String fileAndPath ,String authorName) throws SQLException
+    {
+        String query = "INSERT INTO authors (authorName) VALUES (?)";
+        Connection conn = this.ConnectToDb(fileAndPath);
+        PreparedStatement prep = conn.prepareStatement(query);
+        try      
+        {
+            prep.setString(1, authorName);
+            prep.executeUpdate();
+            prep.getConnection().commit();
+        } catch (SQLException ex)
+        {
+            System.out.println(ex.getMessage());
+            prep.getConnection().rollback();
+        }
+    }
+    
+    // test this
+    public void UpdateAuthor(String fileAndPath , String authorId ,String authorName) throws SQLException
+    {
+       String query = "UPDATE authors SET authorName = ? WHERE authorId = ?";
+        Connection conn = this.ConnectToDb(fileAndPath);
+        PreparedStatement prep = conn.prepareStatement(query);
+        try      
+        {
+            prep.setString(1, authorName);
+            prep.setString(2, authorId);
+            prep.executeUpdate();
+            prep.getConnection().commit();
+        } catch (SQLException ex)
+        {
+            System.out.println(ex.getMessage());
+            prep.getConnection().rollback();
+        } 
+    }
+    
+    // test this
+    public void InsertBook(String fileAndPath ,String bookTitle, String bookGenre, String authorDropdown) throws SQLException
+    {
+        String query = "INSERT INTO books (bookTitle, bookGenre, author) VALUES (?, ?, ?)";
+        Connection conn = this.ConnectToDb(fileAndPath);
+        PreparedStatement prep = conn.prepareStatement(query);
+        try      
+        {
+            prep.setString(1, bookTitle);
+            prep.setString(2, bookGenre);
+            prep.setString(3, authorDropdown);
+            prep.executeUpdate();
+            prep.getConnection().commit();
+        } catch (SQLException ex)
+        {
+            System.out.println(ex.getMessage());
+            prep.getConnection().rollback();
+        }
+    }
+    
+    // test this
+    public void UpdateBook(String fileAndPath , String bookTitle, String bookGenre, String authorDropdown, String bookId) throws SQLException
+    {
+       String query = "UPDATE books SET bookTitle = ?, bookGenre = ?, author = ? WHERE bookId = ?";
+        Connection conn = this.ConnectToDb(fileAndPath);
+        PreparedStatement prep = conn.prepareStatement(query);
+        try      
+        {
+            prep.setString(1, bookTitle);
+            prep.setString(2, bookGenre);
+            prep.setString(3, authorDropdown);
+            prep.setString(4, bookId);
+            prep.executeUpdate();
+            prep.getConnection().commit();
+        } catch (SQLException ex)
+        {
+            System.out.println(ex.getMessage());
+            prep.getConnection().rollback();
+        } 
+    }
+    
+    // </editor-fold>
+    
+    // TODO: test Author Nav Methods
+    // <editor-fold defaultstate="collapsed" desc="Author Navigation Buttons">
+    
+    // test this
+    public Author GetFirstAuthor(String fileAndPath) throws SQLException
+    {
+        Author auth = new Author();
+        String query = "SELECT * FROM authors ORDER BY authorId ASC LIMIT 1";
+        
+        try (Connection conn = this.ConnectToDb(fileAndPath);
+        Statement stat = conn.createStatement();
+        ResultSet result = stat.executeQuery(query))
+        {
+            auth.SetAuthorId(result.getLong("authorId"));
+            auth.SetAuthorName(result.getString("authorName"));
+            return auth;
+        }
+        catch(SQLException ex)
+        {
+            System.out.println(ex.getMessage());        
+            return auth = new Author();
+        }
+    }
+    
+    // test this
+    public Author GetLastAuthor(String fileAndPath) throws SQLException
+    {
+        Author auth = new Author();
+        String query = "SELECT * FROM authors ORDER BY authorId DESC LIMIT 1";
+        
+        try (Connection conn = this.ConnectToDb(fileAndPath);
+        Statement stat = conn.createStatement();
+        ResultSet result = stat.executeQuery(query))
+        {
+            auth.SetAuthorId(result.getLong("authorId"));
+            auth.SetAuthorName(result.getString("authorName"));
+            return auth;
+        }
+        catch(SQLException ex)
+        {
+            System.out.println(ex.getMessage());        
+            return auth = new Author();
+        }
+    }
+    
+    // test this
+    public Author GetNextAuthor(String fileAndPath, String authorId) throws SQLException
+    {
+        Author auth = new Author();
+        String query = "SELECT * FROM authors WHERE authorId > ? LIMIT 1";
+        
+        try (Connection conn = this.ConnectToDb(fileAndPath);
+        PreparedStatement prep = conn.prepareStatement(query);
+        ResultSet result = prep.executeQuery(query))
+        {
+            prep.setString(1, authorId);
+            auth.SetAuthorId(result.getLong("authorId"));
+            auth.SetAuthorName(result.getString("authorName"));
+            return auth;
+        }
+        catch(SQLException ex)
+        {
+            System.out.println(ex.getMessage());        
+            return auth = new Author();
+        } 
+    }
+    
+    // test this
+    public Author getPreviousAuthor(String fileAndPath, String authorId) throws SQLException
+    {
+        Author auth = new Author();
+        String query = "SELECT * FROM authors WHERE authorId < ? ORDER BY authorId DESC LIMIT 1";
+        
+        try (Connection conn = this.ConnectToDb(fileAndPath);
+        PreparedStatement prep = conn.prepareStatement(query);
+        ResultSet result = prep.executeQuery(query))
+        {
+            prep.setString(1, authorId);
+            auth.SetAuthorId(result.getLong("authorId"));
+            auth.SetAuthorName(result.getString("authorName"));
+            return auth;
+        }
+        catch(SQLException ex)
+        {
+            System.out.println(ex.getMessage());        
+            return auth = new Author();
+        } 
+    }
+    
+    // </editor-fold>
+    
+    // TODO: write and test Book Nav methods 
+    // <editor-fold defaultstate="collapsed" desc="All Books Navigation">
+    
+    // </editor-fold>
     
     // make other methods here
 
