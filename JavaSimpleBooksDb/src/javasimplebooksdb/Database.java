@@ -243,7 +243,7 @@ public class Database
     }
     
     // test this
-    public Author getPreviousAuthor(String fileAndPath, String authorId) throws SQLException
+    public Author GetPreviousAuthor(String fileAndPath, String authorId) throws SQLException
     {
         Author auth = new Author();
         String query = "SELECT * FROM authors WHERE authorId < ? ORDER BY authorId DESC LIMIT 1";
@@ -268,6 +268,101 @@ public class Database
     
     // TODO: write and test Book Nav methods 
     // <editor-fold defaultstate="collapsed" desc="All Books Navigation">
+    
+    // test this
+    public BooksWithAuthorsName GetFirstBookAndAuthor(String fileAndPath) throws SQLException
+    {
+        BooksWithAuthorsName book = new BooksWithAuthorsName();
+        String query = "SELECT * FROM BooksWithAuthor ORDER BY bookId ASC LIMIT 1";
+        
+        try (Connection conn = this.ConnectToDb(fileAndPath);
+        Statement stat = conn.createStatement();
+        ResultSet result = stat.executeQuery(query))
+        {
+            book.SetBookId(result.getLong("bookId"));
+            book.SetBookTitle(result.getString("bookTitle"));
+            book.SetBookGenre("bookGenre");
+            book.SetAuthorName("author");
+            return book;
+        }
+        catch(SQLException ex)
+        {
+            System.out.println(ex.getMessage());        
+            return book = new BooksWithAuthorsName();
+        }
+    }
+    
+    // test this
+    public BooksWithAuthorsName GetLastBookAndAuthor(String fileAndPath) throws SQLException
+    {
+        BooksWithAuthorsName book = new BooksWithAuthorsName();
+        String query = "SELECT * FROM BooksWithAuthor ORDER BY bookId DESC LIMIT 1";
+        
+        try (Connection conn = this.ConnectToDb(fileAndPath);
+        Statement stat = conn.createStatement();
+        ResultSet result = stat.executeQuery(query))
+        {
+            book.SetBookId(result.getLong("bookId"));
+            book.SetBookTitle(result.getString("bookTitle"));
+            book.SetBookGenre("bookGenre");
+            book.SetAuthorName("author");
+            return book;
+        }
+        catch(SQLException ex)
+        {
+            System.out.println(ex.getMessage());        
+            return book = new BooksWithAuthorsName();
+        }
+    }
+    
+    // test this
+    public BooksWithAuthorsName GetNextBookAndAuthor(String fileAndPath, String bookId) throws SQLException
+    {
+        BooksWithAuthorsName book = new BooksWithAuthorsName();
+        String query = "SELECT * FROM BooksWithAuthor WHERE bookId > ? LIMIT 1";
+        
+        try (Connection conn = this.ConnectToDb(fileAndPath);
+        PreparedStatement prep = conn.prepareStatement(query);
+        ResultSet result = prep.executeQuery(query))
+        {
+            prep.setString(1, bookId);
+            book.SetBookId(result.getLong("bookId"));
+            book.SetBookTitle(result.getString("bookTitle"));
+            book.SetBookGenre("bookGenre");
+            book.SetAuthorName("author");
+            return book;
+        }
+        catch(SQLException ex)
+        {
+            System.out.println(ex.getMessage());        
+            return book = new BooksWithAuthorsName();
+        } 
+    }
+    
+    // test this
+    public BooksWithAuthorsName GetPreviousBookAndAuthor(String fileAndPath, String bookId) throws SQLException
+    {
+        BooksWithAuthorsName book = new BooksWithAuthorsName();
+        String query = "SELECT * FROM BooksWithAuthor WHERE bookId < ? ORDER BY bookId DESC LIMIT 1";
+        
+        try (Connection conn = this.ConnectToDb(fileAndPath);
+        PreparedStatement prep = conn.prepareStatement(query);
+        ResultSet result = prep.executeQuery(query))
+        {
+            prep.setString(1, bookId);
+            book.SetBookId(result.getLong("bookId"));
+            book.SetBookTitle(result.getString("bookTitle"));
+            book.SetBookGenre("bookGenre");
+            book.SetAuthorName("author");
+            return book;
+        }
+        catch(SQLException ex)
+        {
+            System.out.println(ex.getMessage());        
+            return book = new BooksWithAuthorsName();
+        } 
+    }
+    
     
     // </editor-fold>
     

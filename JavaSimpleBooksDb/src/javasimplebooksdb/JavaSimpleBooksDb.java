@@ -63,6 +63,9 @@ public class JavaSimpleBooksDb extends JFrame implements ActionListener, FocusLi
     public File DbFile = new File(DbNameAndPath);
     
     public Database db = new Database();
+    public Author authData;
+    public BooksWithAuthorsName bookData;
+    public BooksWithAuthorsName[][] tableData = {};
     
     public static void main(String[] args)
     {
@@ -107,8 +110,7 @@ public class JavaSimpleBooksDb extends JFrame implements ActionListener, FocusLi
         /*btnNavPrev, btnNavNext,
         btnNavClearBook, btnNavRefreshTable, btnEditBookSave, btnEditBookNew,
         btnEditBookFirst, btnEditBookLast, btnEditBookPrev, btnEditBookNext,
-        btnEditAuthorFirst,
-        btnEditAuthorLast, btnEditAuthorPrev, btnEditAuthorNext;*/
+        */
         
         // <editor-fold defaultstate="collapsed" desc="Author Add Edit Buttons">
         
@@ -148,6 +150,78 @@ public class JavaSimpleBooksDb extends JFrame implements ActionListener, FocusLi
         
         // </editor-fold>
         
+        // <editor-fold defaultstate="collapsed" desc="Author Add Edit Buttons">
+        
+        if (e.getSource() == btnEditAuthorFirst)
+        {
+            authData = new Author();
+            
+            try
+            {
+                authData = db.GetFirstAuthor(DbNameAndPath);
+                lblAddEditAuthorIdStatus.setText(Long.toString(authData.GetAuthorId()));
+                txtAuthorName.setText(authData.GetAuthorName());
+                lblStatusUpdate.setText("First Author");
+            }
+            catch(Exception ex)
+            {
+                lblStatusUpdate.setText("Could not find first Author");
+            }       
+        }
+        
+        if (e.getSource() == btnEditAuthorLast)
+        {
+            authData = new Author();
+            
+            try
+            {
+                authData = db.GetLastAuthor(DbNameAndPath);
+                lblAddEditAuthorIdStatus.setText(Long.toString(authData.GetAuthorId()));
+                txtAuthorName.setText(authData.GetAuthorName());
+                lblStatusUpdate.setText("Last Author");
+            }
+            catch(Exception ex)
+            {
+                lblStatusUpdate.setText("Could not find last Author");
+            }  
+        }
+        
+        if (e.getSource() == btnEditAuthorPrev)
+        {
+            authData = new Author();
+            
+            try
+            {
+                authData = db.GetPreviousAuthor(DbNameAndPath, lblAddEditAuthorIdStatus.getText());
+                lblAddEditAuthorIdStatus.setText(Long.toString(authData.GetAuthorId()));
+                txtAuthorName.setText(authData.GetAuthorName());
+                lblStatusUpdate.setText("Previous Author");
+            }
+            catch(Exception ex)
+            {
+                lblStatusUpdate.setText("This is the first Author");
+            }
+        }
+        
+        if (e.getSource() == btnEditAuthorNext)
+        {
+            authData = new Author();
+            
+            try
+            {
+                authData = db.GetPreviousAuthor(DbNameAndPath, lblAddEditAuthorIdStatus.getText());
+                lblAddEditAuthorIdStatus.setText(Long.toString(authData.GetAuthorId()));
+                txtAuthorName.setText(authData.GetAuthorName());
+                lblStatusUpdate.setText("Next Author");
+            }
+            catch(Exception ex)
+            {
+                lblStatusUpdate.setText("This is the last Author");
+            }
+        }
+        
+        // </editor-fold>
+        
         
         if (e.getSource() == btnNavFirst)
         {
@@ -181,7 +255,8 @@ public class JavaSimpleBooksDb extends JFrame implements ActionListener, FocusLi
         ShowLabels(springLayout);
         ShowTextFields(springLayout);
         ShowButtons(springLayout);
-
+        //ShowTablePanel(springLayout);
+        BookTable(springLayout, tableData);
     }
 
     private void ShowLabels(SpringLayout layout)
@@ -208,7 +283,6 @@ public class JavaSimpleBooksDb extends JFrame implements ActionListener, FocusLi
         lblAddEditAuthorName = LibraryItems.LocateAJLabel(this, layout, "Author Name:", 300, 396, false, 9);
         lblAddEditStatus = LibraryItems.LocateAJLabel(this, layout, "Add/EditStatus:", 300, 540, false, 9);
         lblStatusUpdate = LibraryItems.LocateAJLabel(this, layout, "placeholder", 391, 540, false, 9);
-        lblNote = LibraryItems.LocateAJLabel(this, layout, "Make Table later", 300, 80, true, 20);
     }
 
     private void ShowTextFields(SpringLayout layout)
@@ -240,21 +314,74 @@ public class JavaSimpleBooksDb extends JFrame implements ActionListener, FocusLi
         btnEditAuthorNext = LibraryItems.LocateAJButton(this, this, layout, "Prev", 389, 476, 75, 20);
     }
 
-    public void QuestionPanel(SpringLayout myPanelLayout)
+    /*public void ShowTablePanel(SpringLayout myPanelLayout)
     {
         // Create a panel to hold all other components
-        JPanel questionPanel = new JPanel();
-        questionPanel.setLayout(new BorderLayout());
-        add(questionPanel);
+        JPanel tablePanel = new JPanel();
+        tablePanel.setLayout(new BorderLayout());
+        add(tablePanel);
 
         // Add the table to a scrolling pane, size and locate
-        questionPanel.setPreferredSize(new Dimension(250, 156));
-        myPanelLayout.putConstraint(SpringLayout.WEST, questionPanel, 5, SpringLayout.WEST, this);
-        myPanelLayout.putConstraint(SpringLayout.NORTH, questionPanel, 90, SpringLayout.NORTH, this);
-        Border questionBorder = BorderFactory.createLineBorder(new Color(0, 0, 140), 3);
-        questionPanel.setBorder(questionBorder);
-        questionPanel.setBackground(new Color(176, 224, 230));
+        tablePanel.setPreferredSize(new Dimension(352, 305));
+        myPanelLayout.putConstraint(SpringLayout.WEST, tablePanel, 195, SpringLayout.WEST, this);
+        myPanelLayout.putConstraint(SpringLayout.NORTH, tablePanel, 12, SpringLayout.NORTH, this);
+        //Border questionBorder = BorderFactory.createLineBorder(new Color(0, 0, 140), 3);
+        //tablePanel.setBorder(questionBorder);
+        //tablePanel.setBackground(new Color(176, 224, 230));
+        tablePanel.setBackground(Color.LIGHT_GRAY);
+    }*/
+    
+    public void BookTable(SpringLayout myPanelLayout, BooksWithAuthorsName[][] data)
+    {
+        // Create a panel to hold all other components
+        JPanel topPanel = new JPanel();
+        topPanel.setLayout(new BorderLayout());
+        add(topPanel);
 
+        // Create column names
+        String columnNames[] =
+        {
+            "Book Title", "Book Genre", "Author Name", "Book Id"
+        };
+        
+        JTable bookTable = new JTable(data, columnNames);
+
+        // Configure some of JTable's paramters
+        bookTable.isForegroundSet();
+        bookTable.setShowHorizontalLines(true);
+        bookTable.setRowSelectionAllowed(true);
+        bookTable.setColumnSelectionAllowed(true);
+        add(bookTable);
+
+        // Change the text and background colours
+        bookTable.setSelectionForeground(Color.white);
+        bookTable.setSelectionBackground(Color.red);
+
+        // Add the table to a scrolling pane, size and locate
+        JScrollPane scrollPane = bookTable.createScrollPaneForTable(bookTable); 
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        topPanel.add(scrollPane, BorderLayout.CENTER);
+        scrollPane.setVisible(true);
+        topPanel.setPreferredSize(new Dimension(352, 305));
+        myPanelLayout.putConstraint(SpringLayout.WEST, topPanel, 195, SpringLayout.WEST, this);
+        myPanelLayout.putConstraint(SpringLayout.NORTH, topPanel, 12, SpringLayout.NORTH, this);
+
+        bookTable.setOpaque(true);
+        bookTable.setFillsViewportHeight(true);
+        //bookTable.getTableHeader().setBackground(new Color(176, 224, 230));
+        // matte border allows you to set the values of each side of the border
+        //Border tableHearderBorder = BorderFactory.createMatteBorder(2, 2, 0, 2, new Color(0, 0, 140));
+        //bookTable.getTableHeader().setBorder(tableHearderBorder);
+        //Border tableBodyBorder = BorderFactory.createMatteBorder(0, 2, 2, 2, new Color(0, 0, 140));
+        //bookTable.setBorder(tableBodyBorder);
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
+
+        // make a for loop for the table.getcolumn
+        /*for (int i = 0; i < 4; i++)
+        {
+            bookTable.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+        }*/
     }
 
     @Override
@@ -267,8 +394,10 @@ public class JavaSimpleBooksDb extends JFrame implements ActionListener, FocusLi
     public void focusLost(FocusEvent e)
     {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+    }  
 }
+
+
 
 // </editor-fold>
 
