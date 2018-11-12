@@ -9,6 +9,8 @@ import java.awt.Font;
 import java.awt.event.ActionListener;
 import javax.swing.border.Border;
 import java.awt.event.FocusListener;
+import java.awt.event.MouseListener;
+import java.awt.event.ActionListener;
 
 public class LibraryItems 
 {
@@ -108,14 +110,14 @@ public class LibraryItems
         return myJTextArea;
     } 
     
-    public static JComboBox LocateAJComboBox(JFrame myJFrame,/* MouseListener myMouseListener,*/ SpringLayout myJTextFieldLayout, int x, int y)
+    public static JComboBox LocateAJComboBox(JFrame myJFrame, ActionListener myActionListener, SpringLayout myJTextFieldLayout, int x, int y)
     {
         JComboBox myJComboBox = new JComboBox();   
         myJFrame.add(myJComboBox); 
-//        myJComboBox.addMouseListener(myMouseListener);
+        myJComboBox.addActionListener(myActionListener);
         myJTextFieldLayout.putConstraint(SpringLayout.WEST, myJComboBox, x, SpringLayout.WEST, myJFrame);
         myJTextFieldLayout.putConstraint(SpringLayout.NORTH, myJComboBox, y, SpringLayout.NORTH, myJFrame);
-        myJComboBox.setPrototypeDisplayValue("XXXXXXXX"); // this sets all comboxes to this size will have to change this a to local version later though in the method at the moment serves my purposes (NOT FUTURE PROOF) 
+        myJComboBox.setPrototypeDisplayValue("XXXXXXXXxxx"); // this sets all comboxes to this size will have to change this a to local version later though in the method at the moment serves my purposes (NOT FUTURE PROOF) 
         return myJComboBox;
     }
     

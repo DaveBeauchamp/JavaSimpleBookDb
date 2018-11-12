@@ -25,22 +25,11 @@ public class Database
         } catch (SQLException ex)
         {
             System.out.println(ex.getMessage());
-        } finally
-        {
-            try
-            {
-                if (conn != null)
-                {
-                    conn.close();
-                }
-            } catch (SQLException ex)
-            {
-                System.out.println(ex.getMessage());
-            }
-        }
+        } 
+        
         return conn;
     }
-
+    
     public void CreateNewDatabase(String fileAndPath)
     {
         String url = "jdbc:sqlite:" + fileAndPath;   
@@ -95,82 +84,118 @@ public class Database
     // TODO: test Add Edit Methods
     // <editor-fold defaultstate="collapsed" desc="Add Edit Methods">
     
-    // test this
     public void InsertAuthor(String fileAndPath ,String authorName) throws SQLException
     {
+        Connection conn = null;
+        PreparedStatement prep = null;
+        
         String query = "INSERT INTO authors (authorName) VALUES (?)";
-        Connection conn = this.ConnectToDb(fileAndPath);
-        PreparedStatement prep = conn.prepareStatement(query);
         try      
         {
+            conn = this.ConnectToDb(fileAndPath);
+            conn.setAutoCommit(false);
+            prep = conn.prepareStatement(query);
             prep.setString(1, authorName);
             prep.executeUpdate();
-            prep.getConnection().commit();
+            conn.commit();
+            
         } catch (SQLException ex)
         {
             System.out.println(ex.getMessage());
-            prep.getConnection().rollback();
+            conn.rollback();
+        }
+        finally 
+        {
+            if (prep != null) prep.close();
+            if (conn != null) conn.close();
         }
     }
     
-    // test this
     public void UpdateAuthor(String fileAndPath , String authorId ,String authorName) throws SQLException
     {
+        Connection conn = null;
+        PreparedStatement prep = null;
+        
        String query = "UPDATE authors SET authorName = ? WHERE authorId = ?";
-        Connection conn = this.ConnectToDb(fileAndPath);
-        PreparedStatement prep = conn.prepareStatement(query);
         try      
         {
+            conn = this.ConnectToDb(fileAndPath);
+            conn.setAutoCommit(false);
+            prep = conn.prepareStatement(query);
             prep.setString(1, authorName);
             prep.setString(2, authorId);
             prep.executeUpdate();
-            prep.getConnection().commit();
+            conn.commit();
+            
         } catch (SQLException ex)
         {
             System.out.println(ex.getMessage());
-            prep.getConnection().rollback();
-        } 
+            conn.rollback();
+        }
+        finally 
+        {
+            if (prep != null) prep.close();
+            if (conn != null) conn.close();
+        }
     }
     
     // test this
     public void InsertBook(String fileAndPath ,String bookTitle, String bookGenre, String authorDropdown) throws SQLException
     {
+        Connection conn = null;
+        PreparedStatement prep = null;
+        
         String query = "INSERT INTO books (bookTitle, bookGenre, author) VALUES (?, ?, ?)";
-        Connection conn = this.ConnectToDb(fileAndPath);
-        PreparedStatement prep = conn.prepareStatement(query);
         try      
         {
+            conn = this.ConnectToDb(fileAndPath);
+            conn.setAutoCommit(false);
+            prep = conn.prepareStatement(query);
             prep.setString(1, bookTitle);
             prep.setString(2, bookGenre);
             prep.setString(3, authorDropdown);
             prep.executeUpdate();
-            prep.getConnection().commit();
+            conn.commit();
         } catch (SQLException ex)
         {
             System.out.println(ex.getMessage());
-            prep.getConnection().rollback();
+            conn.rollback();
+        }
+        finally 
+        {
+            if (prep != null) prep.close();
+            if (conn != null) conn.close();
         }
     }
     
     // test this
     public void UpdateBook(String fileAndPath , String bookTitle, String bookGenre, String authorDropdown, String bookId) throws SQLException
     {
+        Connection conn = null;
+        PreparedStatement prep = null;
+        
        String query = "UPDATE books SET bookTitle = ?, bookGenre = ?, author = ? WHERE bookId = ?";
-        Connection conn = this.ConnectToDb(fileAndPath);
-        PreparedStatement prep = conn.prepareStatement(query);
         try      
         {
+            conn = this.ConnectToDb(fileAndPath);
+            conn.setAutoCommit(false);
+            prep = conn.prepareStatement(query);
             prep.setString(1, bookTitle);
             prep.setString(2, bookGenre);
             prep.setString(3, authorDropdown);
             prep.setString(4, bookId);
             prep.executeUpdate();
-            prep.getConnection().commit();
+            conn.commit();
         } catch (SQLException ex)
         {
             System.out.println(ex.getMessage());
-            prep.getConnection().rollback();
-        } 
+            conn.rollback();
+        }
+        finally 
+        {
+            if (prep != null) prep.close();
+            if (conn != null) conn.close();
+        }
     }
     
     // </editor-fold>
@@ -178,7 +203,6 @@ public class Database
     // TODO: test Author Nav Methods
     // <editor-fold defaultstate="collapsed" desc="Author Navigation Buttons">
     
-    // test this
     public Author GetFirstAuthor(String fileAndPath) throws SQLException
     {
         Author auth = new Author();
@@ -194,12 +218,12 @@ public class Database
         }
         catch(SQLException ex)
         {
-            System.out.println(ex.getMessage());        
+            System.out.println(ex.getMessage()); 
             return auth = new Author();
         }
+        
     }
     
-    // test this
     public Author GetLastAuthor(String fileAndPath) throws SQLException
     {
         Author auth = new Author();
@@ -220,17 +244,16 @@ public class Database
         }
     }
     
-    // test this
-    public Author GetNextAuthor(String fileAndPath, String authorId) throws SQLException
+    public Author GetNextAuthor(String fileAndPath, long authorId) throws SQLException
     {
         Author auth = new Author();
-        String query = "SELECT * FROM authors WHERE authorId > ? LIMIT 1";
-        
+        // not the best way of achieveing this, parameter would be better
+        String query = "SELECT * FROM authors WHERE authorId > " + authorId + " LIMIT 1";
+
         try (Connection conn = this.ConnectToDb(fileAndPath);
-        PreparedStatement prep = conn.prepareStatement(query);
-        ResultSet result = prep.executeQuery(query))
+                Statement stat = conn.createStatement();
+                ResultSet result = stat.executeQuery(query))
         {
-            prep.setString(1, authorId);
             auth.SetAuthorId(result.getLong("authorId"));
             auth.SetAuthorName(result.getString("authorName"));
             return auth;
@@ -242,17 +265,16 @@ public class Database
         } 
     }
     
-    // test this
-    public Author GetPreviousAuthor(String fileAndPath, String authorId) throws SQLException
+    public Author GetPreviousAuthor(String fileAndPath, long authorId) throws SQLException
     {
         Author auth = new Author();
-        String query = "SELECT * FROM authors WHERE authorId < ? ORDER BY authorId DESC LIMIT 1";
-        
+        // not the best way of achieveing this, parameter would be better
+        String query = "SELECT * FROM authors WHERE authorId < " + authorId + " ORDER BY authorId DESC LIMIT 1";
+
         try (Connection conn = this.ConnectToDb(fileAndPath);
-        PreparedStatement prep = conn.prepareStatement(query);
-        ResultSet result = prep.executeQuery(query))
+                Statement stat = conn.createStatement();
+                ResultSet result = stat.executeQuery(query))
         {
-            prep.setString(1, authorId);
             auth.SetAuthorId(result.getLong("authorId"));
             auth.SetAuthorName(result.getString("authorName"));
             return auth;
@@ -316,16 +338,15 @@ public class Database
     }
     
     // test this
-    public BooksWithAuthorsName GetNextBookAndAuthor(String fileAndPath, String bookId) throws SQLException
+    public BooksWithAuthorsName GetNextBookAndAuthor(String fileAndPath, long bookId) throws SQLException
     {
         BooksWithAuthorsName book = new BooksWithAuthorsName();
-        String query = "SELECT * FROM BooksWithAuthor WHERE bookId > ? LIMIT 1";
-        
+        String query = "SELECT * FROM BooksWithAuthor WHERE bookId > " + bookId + " LIMIT 1";
+
         try (Connection conn = this.ConnectToDb(fileAndPath);
-        PreparedStatement prep = conn.prepareStatement(query);
-        ResultSet result = prep.executeQuery(query))
+                Statement stat = conn.createStatement();
+                ResultSet result = stat.executeQuery(query))
         {
-            prep.setString(1, bookId);
             book.SetBookId(result.getLong("bookId"));
             book.SetBookTitle(result.getString("bookTitle"));
             book.SetBookGenre("bookGenre");
@@ -340,16 +361,15 @@ public class Database
     }
     
     // test this
-    public BooksWithAuthorsName GetPreviousBookAndAuthor(String fileAndPath, String bookId) throws SQLException
+    public BooksWithAuthorsName GetPreviousBookAndAuthor(String fileAndPath, long bookId) throws SQLException
     {
         BooksWithAuthorsName book = new BooksWithAuthorsName();
-        String query = "SELECT * FROM BooksWithAuthor WHERE bookId < ? ORDER BY bookId DESC LIMIT 1";
+        String query = "SELECT * FROM BooksWithAuthor WHERE bookId < " + bookId + " ORDER BY bookId DESC LIMIT 1";
         
         try (Connection conn = this.ConnectToDb(fileAndPath);
-        PreparedStatement prep = conn.prepareStatement(query);
-        ResultSet result = prep.executeQuery(query))
+                Statement stat = conn.createStatement();
+                ResultSet result = stat.executeQuery(query))
         {
-            prep.setString(1, bookId);
             book.SetBookId(result.getLong("bookId"));
             book.SetBookTitle(result.getString("bookTitle"));
             book.SetBookGenre("bookGenre");
@@ -360,12 +380,34 @@ public class Database
         {
             System.out.println(ex.getMessage());        
             return book = new BooksWithAuthorsName();
-        } 
+        }   
     }
-    
     
     // </editor-fold>
     
     // make other methods here
-
+    
+    public ArrayList<Author> GetAllAuthors(String fileAndPath)  throws SQLException
+    {
+        Author tempAuth = new Author();
+        ArrayList<Author> listAuth = new ArrayList<Author>();
+        
+        String query = "SELECT * FROM authors";
+        
+        try (Connection conn = ConnectToDb(fileAndPath);
+             Statement stat  = conn.createStatement();
+                ResultSet result = stat.executeQuery(query))
+        {
+            while (result.next())
+            {
+                tempAuth.SetAuthorId(result.getLong("authorId"));
+                tempAuth.SetAuthorName(result.getString("authorName"));
+                listAuth.add(tempAuth);
+                tempAuth = new Author();
+            }
+        }
+        
+        return listAuth;
+    }
+    
 }

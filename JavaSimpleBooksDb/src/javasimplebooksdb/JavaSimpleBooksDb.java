@@ -8,29 +8,21 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SpringLayout;
-import javax.swing.border.Border;
-import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
-import java.awt.Graphics;
 import java.awt.event.FocusEvent;
 import java.io.File;
-import java.io.FileWriter;
-import java.util.HashMap;
 import javax.swing.JPanel;
-import java.net.*;
-import java.io.*;
 import java.awt.event.FocusListener;
-import javax.swing.JOptionPane;
+
+
 
 /**
  *
@@ -51,7 +43,8 @@ public class JavaSimpleBooksDb extends JFrame implements ActionListener, FocusLi
             btnNavClearBook, btnNavRefreshTable, btnEditBookSave, btnEditBookNew,
             btnEditBookFirst, btnEditBookLast, btnEditBookPrev, btnEditBookNext,
             btnEditAuthorSave, btnEditAuthorNew, btnEditAuthorFirst,
-            btnEditAuthorLast, btnEditAuthorPrev, btnEditAuthorNext;
+            btnEditAuthorLast, btnEditAuthorPrev, btnEditAuthorNext,
+            btnRefreshCombo;
 
     private JTextField txtBookTitle, txtBookGenre, txtAuthorName;
 
@@ -70,8 +63,8 @@ public class JavaSimpleBooksDb extends JFrame implements ActionListener, FocusLi
     public static void main(String[] args)
     {
         JavaSimpleBooksDb booksDb = new JavaSimpleBooksDb();
-        booksDb.RunSimpleBooksDb();
         booksDb.CreateDatabase();
+        booksDb.RunSimpleBooksDb();
     }
 
     private void RunSimpleBooksDb()
@@ -108,8 +101,7 @@ public class JavaSimpleBooksDb extends JFrame implements ActionListener, FocusLi
     public void actionPerformed(ActionEvent e)
     {
         /*btnNavPrev, btnNavNext,
-        btnNavClearBook, btnNavRefreshTable, btnEditBookSave, btnEditBookNew,
-        btnEditBookFirst, btnEditBookLast, btnEditBookPrev, btnEditBookNext,
+        btnNavClearBook, btnNavRefreshTable, ,
         */
         
         // <editor-fold defaultstate="collapsed" desc="Author Add Edit Buttons">
@@ -133,7 +125,7 @@ public class JavaSimpleBooksDb extends JFrame implements ActionListener, FocusLi
                 try
                 {
                     db.UpdateAuthor(DbNameAndPath, lblAddEditAuthorIdStatus.getText(), txtAuthorName.getText());
-                    lblStatusUpdate.setText("Successfully added an Author");
+                    lblStatusUpdate.setText("Successfully updated an Author");
                 }
                 catch(Exception ex)
                 {
@@ -192,7 +184,7 @@ public class JavaSimpleBooksDb extends JFrame implements ActionListener, FocusLi
             
             try
             {
-                authData = db.GetPreviousAuthor(DbNameAndPath, lblAddEditAuthorIdStatus.getText());
+                authData = db.GetPreviousAuthor(DbNameAndPath, Long.parseLong(lblAddEditAuthorIdStatus.getText()));
                 lblAddEditAuthorIdStatus.setText(Long.toString(authData.GetAuthorId()));
                 txtAuthorName.setText(authData.GetAuthorName());
                 lblStatusUpdate.setText("Previous Author");
@@ -209,7 +201,7 @@ public class JavaSimpleBooksDb extends JFrame implements ActionListener, FocusLi
             
             try
             {
-                authData = db.GetPreviousAuthor(DbNameAndPath, lblAddEditAuthorIdStatus.getText());
+                authData = db.GetNextAuthor(DbNameAndPath, Long.parseLong(lblAddEditAuthorIdStatus.getText()));
                 lblAddEditAuthorIdStatus.setText(Long.toString(authData.GetAuthorId()));
                 txtAuthorName.setText(authData.GetAuthorName());
                 lblStatusUpdate.setText("Next Author");
@@ -222,10 +214,113 @@ public class JavaSimpleBooksDb extends JFrame implements ActionListener, FocusLi
         
         // </editor-fold>
         
+        // <editor-fold defaultstate="collapsed" desc="Book Add Edit Buttons">
+        
+        if (e.getSource() == btnEditBookSave)
+        {
+            if (lblEditBookIdStatus.getText() == "0")
+            {
+                try
+                {
+                    db.InsertBook(DbNameAndPath, txtBookTitle.getText(), txtBookGenre.getText(), cboAuthor.getSelectedItem().toString());
+                    lblStatusUpdate.setText("Successfully added a Book");
+                } catch (Exception ex)
+                {
+                    lblStatusUpdate.setText("Something went wrong adding a Book");
+                }
+            }
+            else
+            {
+                try
+                {
+                    db.UpdateBook(DbNameAndPath, txtBookTitle.getText(), txtBookGenre.getText(), cboAuthor.getSelectedItem().toString(), lblEditBookIdStatus.getText());
+                    lblStatusUpdate.setText("Successfully updated a Book");
+                } catch (Exception ex)
+                {
+                    lblStatusUpdate.setText("Something went wrong updating a Book");
+                }
+            }
+        }
+        
+        if (e.getSource() == btnEditBookNew)
+        {
+            lblEditBookIdStatus.setText("0");
+             txtBookTitle.setText("");
+             txtBookGenre.setText("");
+        }
+        
+        if (e.getSource() == btnEditBookFirst)
+        {
+            try
+            {
+                bookData = db.GetFirstBookAndAuthor(DbNameAndPath);
+                lblEditBookIdStatus.setText(Long.toString(bookData.GetBookId()));
+                txtBookTitle.setText(bookData.GetBookTitle());
+                txtBookGenre.setText(bookData.GetBookGenre());
+                cboAuthor.setSelectedItem(bookData.GetAuthorName());
+            }
+            catch(Exception ex)
+            {
+                lblStatusUpdate.setText("Could not find first Book");
+            }   
+        }
+        
+        if (e.getSource() == btnEditBookLast)
+        {
+            try
+            {
+                bookData = db.GetLastBookAndAuthor(DbNameAndPath);
+                lblEditBookIdStatus.setText(Long.toString(bookData.GetBookId()));
+                txtBookTitle.setText(bookData.GetBookTitle());
+                txtBookGenre.setText(bookData.GetBookGenre());
+                cboAuthor.setSelectedItem(bookData.GetAuthorName());
+            }
+            catch(Exception ex)
+            {
+                lblStatusUpdate.setText("Could not find last Book");
+            }
+        }
+        
+        if (e.getSource() == btnEditBookPrev)
+        {
+            bookData = new BooksWithAuthorsName();
+            
+            try
+            {
+                bookData = db.GetPreviousBookAndAuthor(DbNameAndPath, Long.parseLong(lblEditBookIdStatus.getText()));
+                lblAddEditAuthorIdStatus.setText(Long.toString(authData.GetAuthorId()));
+                txtAuthorName.setText(authData.GetAuthorName());
+                lblStatusUpdate.setText("Previous Book");
+            }
+            catch(Exception ex)
+            {
+                lblStatusUpdate.setText("This is the first Book");
+            }
+        }
+        
+        if (e.getSource() == btnEditBookNext)
+        {
+            bookData = new BooksWithAuthorsName();
+            
+            try
+            {
+                bookData = db.GetNextBookAndAuthor(DbNameAndPath, Long.parseLong(lblEditBookIdStatus.getText()));
+                lblAddEditAuthorIdStatus.setText(Long.toString(authData.GetAuthorId()));
+                txtAuthorName.setText(authData.GetAuthorName());
+                lblStatusUpdate.setText("Previous Book");
+            }
+            catch(Exception ex)
+            {
+                lblStatusUpdate.setText("This is the first Book");
+            }
+        }
+
+        // </editor-fold>
+        
         
         if (e.getSource() == btnNavFirst)
         {
-            
+
         }
         
         if (e.getSource() == btnNavLast)
@@ -233,19 +328,17 @@ public class JavaSimpleBooksDb extends JFrame implements ActionListener, FocusLi
             
         }
         
-        
-        
-        /* might use this later
-        if (e.getSource() == btnExit)
+        if (e.getSource() == btnRefreshCombo)
         {
-            send();
-            System.exit(0);
+            JavaSimpleBooksDb booksDb = new JavaSimpleBooksDb();
+            this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
+            booksDb.RunSimpleBooksDb();
         }
-        */
+        
+         
     }
     
     
-
     // <editor-fold defaultstate="collapsed" desc="GUI">
     private void ShowGUIComponents()
     {
@@ -255,7 +348,7 @@ public class JavaSimpleBooksDb extends JFrame implements ActionListener, FocusLi
         ShowLabels(springLayout);
         ShowTextFields(springLayout);
         ShowButtons(springLayout);
-        //ShowTablePanel(springLayout);
+        ShowComboBox(springLayout);
         BookTable(springLayout, tableData);
     }
 
@@ -273,7 +366,7 @@ public class JavaSimpleBooksDb extends JFrame implements ActionListener, FocusLi
         lblNavTitle = LibraryItems.LocateAJLabel(this, layout, "Navigation", 13, 172, true, 20);
         lblAddEditBookTitle = LibraryItems.LocateAJLabel(this, layout, "Add & Edit Books", 13, 320, true, 20);
         lblEditBookId = LibraryItems.LocateAJLabel(this, layout, "Book Id:", 12, 373, false, 9);
-        lblEditBookIdStatus = LibraryItems.LocateAJLabel(this, layout, "placeholder", 98, 373, false, 9);
+        lblEditBookIdStatus = LibraryItems.LocateAJLabel(this, layout, "0", 98, 373, false, 9);
         lblEditBookTitle = LibraryItems.LocateAJLabel(this, layout, "Book Title:", 12, 396, false, 9);
         lblEditBookGenre = LibraryItems.LocateAJLabel(this, layout, "Book Genre:", 12, 418, false, 9);
         lblEditBookAuthor = LibraryItems.LocateAJLabel(this, layout, "Author:", 12, 440, false, 9);
@@ -311,25 +404,28 @@ public class JavaSimpleBooksDb extends JFrame implements ActionListener, FocusLi
         btnEditAuthorFirst = LibraryItems.LocateAJButton(this, this, layout, "First", 303, 447, 75, 20);
         btnEditAuthorLast = LibraryItems.LocateAJButton(this, this, layout, "Last", 389, 447, 75, 20);
         btnEditAuthorPrev = LibraryItems.LocateAJButton(this, this, layout, "Prev", 303, 476, 75, 20);
-        btnEditAuthorNext = LibraryItems.LocateAJButton(this, this, layout, "Prev", 389, 476, 75, 20);
+        btnEditAuthorNext = LibraryItems.LocateAJButton(this, this, layout, "Next", 389, 476, 75, 20);
+        btnRefreshCombo = LibraryItems.LocateAJButton(this, this, layout, "Refresh", 191, 535, 80, 20);
     }
 
-    /*public void ShowTablePanel(SpringLayout myPanelLayout)
+    private void ShowComboBox(SpringLayout layout)
     {
-        // Create a panel to hold all other components
-        JPanel tablePanel = new JPanel();
-        tablePanel.setLayout(new BorderLayout());
-        add(tablePanel);
-
-        // Add the table to a scrolling pane, size and locate
-        tablePanel.setPreferredSize(new Dimension(352, 305));
-        myPanelLayout.putConstraint(SpringLayout.WEST, tablePanel, 195, SpringLayout.WEST, this);
-        myPanelLayout.putConstraint(SpringLayout.NORTH, tablePanel, 12, SpringLayout.NORTH, this);
-        //Border questionBorder = BorderFactory.createLineBorder(new Color(0, 0, 140), 3);
-        //tablePanel.setBorder(questionBorder);
-        //tablePanel.setBackground(new Color(176, 224, 230));
-        tablePanel.setBackground(Color.LIGHT_GRAY);
-    }*/
+        cboAuthor = LibraryItems.LocateAJComboBox(this, this, layout, 98, 437);
+        ArrayList<Author> comboList = new ArrayList<Author>();
+        try
+        {
+            comboList = db.GetAllAuthors(DbNameAndPath);
+            cboAuthor.removeAllItems();
+            for (int i = 0; i < comboList.size(); i++)
+            {
+                cboAuthor.addItem(comboList.get(i).GetAuthorName());
+            }
+        }
+        catch (Exception ex)
+        {
+            lblStatusUpdate.setText("Something went wrong getting Authors for dropdown");
+        }
+    }
     
     public void BookTable(SpringLayout myPanelLayout, BooksWithAuthorsName[][] data)
     {
@@ -383,44 +479,22 @@ public class JavaSimpleBooksDb extends JFrame implements ActionListener, FocusLi
             bookTable.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
         }*/
     }
-
+    
     @Override
     public void focusGained(FocusEvent e)
     {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
+    
     @Override
     public void focusLost(FocusEvent e)
     {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }  
+    } 
+    
 }
 
-
-
 // </editor-fold>
-
-// <editor-fold defaultstate="collapsed" desc="Overrides">
-/*@Override
-        public void actionPerformed(ActionEvent e)
-    {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-        public void focusGained(FocusEvent e)
-    {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-        public void focusLost(FocusEvent e)
-    {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }*/
-    
-    // </editor-fold>
 
 // <editor-fold defaultstate="collapsed" desc="Spare Editor fold">
     
