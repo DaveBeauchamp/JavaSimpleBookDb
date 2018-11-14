@@ -50,7 +50,7 @@ public class Database
     public void CreateDBTables(String fileAndPath)
     {
         String url = "jdbc:sqlite:" + fileAndPath;
-        // will have to find a better way of doing this
+        // will have to find a better way of doing this (maybe a file read all text)
         String booksTable = "CREATE TABLE IF NOT EXISTS books (bookId INTEGER PRIMARY KEY AUTOINCREMENT,\n"
                 + "bookTitle TEXT NOT NULL,\n"
                 + "bookGenre TEXT NOT NULL,\n"
@@ -81,7 +81,6 @@ public class Database
         }
     }
     
-    // TODO: test Add Edit Methods
     // <editor-fold defaultstate="collapsed" desc="Add Edit Methods">
     
     public void InsertAuthor(String fileAndPath ,String authorName) throws SQLException
@@ -139,7 +138,6 @@ public class Database
         }
     }
     
-    // test this
     public void InsertBook(String fileAndPath ,String bookTitle, String bookGenre, String authorDropdown) throws SQLException
     {
         Connection conn = null;
@@ -167,8 +165,7 @@ public class Database
             if (conn != null) conn.close();
         }
     }
-    
-    // test this
+
     public void UpdateBook(String fileAndPath , String bookTitle, String bookGenre, String authorDropdown, String bookId) throws SQLException
     {
         Connection conn = null;
@@ -200,7 +197,6 @@ public class Database
     
     // </editor-fold>
     
-    // TODO: test Author Nav Methods
     // <editor-fold defaultstate="collapsed" desc="Author Navigation Buttons">
     
     public Author GetFirstAuthor(String fileAndPath) throws SQLException
@@ -288,10 +284,8 @@ public class Database
     
     // </editor-fold>
     
-    // TODO: write and test Book Nav methods 
     // <editor-fold defaultstate="collapsed" desc="All Books Navigation">
     
-    // test this
     public BooksWithAuthorsName GetFirstBookAndAuthor(String fileAndPath) throws SQLException
     {
         BooksWithAuthorsName book = new BooksWithAuthorsName();
@@ -303,8 +297,8 @@ public class Database
         {
             book.SetBookId(result.getLong("bookId"));
             book.SetBookTitle(result.getString("bookTitle"));
-            book.SetBookGenre("bookGenre");
-            book.SetAuthorName("author");
+            book.SetBookGenre(result.getString("bookGenre"));
+            book.SetAuthorName(result.getString("authorName"));
             return book;
         }
         catch(SQLException ex)
@@ -314,7 +308,6 @@ public class Database
         }
     }
     
-    // test this
     public BooksWithAuthorsName GetLastBookAndAuthor(String fileAndPath) throws SQLException
     {
         BooksWithAuthorsName book = new BooksWithAuthorsName();
@@ -326,8 +319,8 @@ public class Database
         {
             book.SetBookId(result.getLong("bookId"));
             book.SetBookTitle(result.getString("bookTitle"));
-            book.SetBookGenre("bookGenre");
-            book.SetAuthorName("author");
+            book.SetBookGenre(result.getString("bookGenre"));
+            book.SetAuthorName(result.getString("authorName"));
             return book;
         }
         catch(SQLException ex)
@@ -337,7 +330,6 @@ public class Database
         }
     }
     
-    // test this
     public BooksWithAuthorsName GetNextBookAndAuthor(String fileAndPath, long bookId) throws SQLException
     {
         BooksWithAuthorsName book = new BooksWithAuthorsName();
@@ -349,8 +341,8 @@ public class Database
         {
             book.SetBookId(result.getLong("bookId"));
             book.SetBookTitle(result.getString("bookTitle"));
-            book.SetBookGenre("bookGenre");
-            book.SetAuthorName("author");
+            book.SetBookGenre(result.getString("bookGenre"));
+            book.SetAuthorName(result.getString("authorName"));
             return book;
         }
         catch(SQLException ex)
@@ -360,7 +352,6 @@ public class Database
         } 
     }
     
-    // test this
     public BooksWithAuthorsName GetPreviousBookAndAuthor(String fileAndPath, long bookId) throws SQLException
     {
         BooksWithAuthorsName book = new BooksWithAuthorsName();
@@ -372,8 +363,8 @@ public class Database
         {
             book.SetBookId(result.getLong("bookId"));
             book.SetBookTitle(result.getString("bookTitle"));
-            book.SetBookGenre("bookGenre");
-            book.SetAuthorName("author");
+            book.SetBookGenre(result.getString("bookGenre"));
+            book.SetAuthorName(result.getString("authorName"));
             return book;
         }
         catch(SQLException ex)
@@ -384,8 +375,6 @@ public class Database
     }
     
     // </editor-fold>
-    
-    // make other methods here
     
     public ArrayList<Author> GetAllAuthors(String fileAndPath)  throws SQLException
     {
@@ -408,6 +397,31 @@ public class Database
         }
         
         return listAuth;
+    }
+    
+    public ArrayList<BooksWithAuthorsName> GetAllBooksWithAuthors(String fileAndPath)  throws SQLException
+    {
+        BooksWithAuthorsName tempBookAuth = new BooksWithAuthorsName();
+        ArrayList<BooksWithAuthorsName> listBookAuth = new ArrayList<BooksWithAuthorsName>();
+        
+        String query = "SELECT * FROM BooksWithAuthor";
+        
+        try (Connection conn = ConnectToDb(fileAndPath);
+             Statement stat  = conn.createStatement();
+                ResultSet result = stat.executeQuery(query))
+        {
+            while (result.next())
+            {
+                tempBookAuth.SetBookId(result.getLong("bookId"));
+                tempBookAuth.SetBookTitle(result.getString("bookTitle"));
+                tempBookAuth.SetBookGenre(result.getString("bookGenre"));
+                tempBookAuth.SetAuthorName(result.getString("authorName"));
+                listBookAuth.add(tempBookAuth);
+                tempBookAuth = new BooksWithAuthorsName();
+            }
+        }
+        
+        return listBookAuth;
     }
     
 }
